@@ -1,0 +1,22 @@
+-- Try: [py] or [python] on console, depends on your setup 
+py pacman.py
+py pacman.py --layout testMaze --pacman GoWestAgent
+py pacman.py --layout tinyMaze --pacman GoWestAgent
+py pacman.py -h
+py pacman.py -l tinyMaze -p SearchAgent -a fn=tinyMazeSearch
+py pacman.py -l tinyMaze -p SearchAgent
+py pacman.py -l mediumMaze -p SearchAgent
+py pacman.py -l bigMaze -z .5 -p SearchAgent
+py pacman.py -l mediumMaze -p SearchAgent -a fn=bfs
+py pacman.py -l bigMaze -p SearchAgent -a fn=bfs -z .5
+py eightpuzzle.py
+py pacman.py -l mediumMaze -p SearchAgent -a fn=ucs
+py pacman.py -l mediumDottedMaze -p StayEastSearchAgent
+py pacman.py -l mediumScaryMaze -p StayWestSearchAgent
+py pacman.py -l bigMaze -z .5 -p SearchAgent -a fn=astar,heuristic=manhattanHeuristic 
+py pacman.py -l tinyCorners -p SearchAgent -a fn=bfs,prob=CornersProblem
+py pacman.py -l mediumCorners -p SearchAgent -a fn=bfs,prob=CornersProblem
+py pacman.py -l mediumCorners -p AStarCornersAgent -z 0.5
+py pacman.py -l testSearch -p AStarFoodSearchAgent
+py pacman.py -l trickySearch -p AStarFoodSearchAgent
+py pacman.py -l bigSearch -p ClosestDotSearchAgent -z .5 
