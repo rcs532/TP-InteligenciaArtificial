@@ -90,10 +90,48 @@ def depthFirstSearch(problem):
     
     util.raiseNotDefined()
 
+
+#python pacman.py -l mediumMaze -p SearchAgent -a fn=bfs  comando para ejecutar
+ 
+
 def breadthFirstSearch(problem):
-    """Search the shallowest nodes in the search tree first."""
-    "*** YOUR CODE HERE ***"
+    node = {'state':problem.getStartState(), 'cost':0} #Me posiciono en el nodo inicial, y llevo registro del costo
+    if(problem.isGoalState(node['state'])): 
+        return [] #si comienzo en la meta entonces no retorno acciones para hacer
+    frontier = util.Queue()
+    frontier.push(node) # Se crea un queue FIFO con node como el unico elemento
+    explored=set() #declaramos un set vacio para llevar registro de que exploramos
+
+    while True:
+        if frontier.isEmpty():
+            raise Exception("Search failed")
+
+        node= frontier.pop()
+
+        explored.add(node['state'])
+        #ahora empezamos a ver a los sucesores
+        successors = problem.getSuccessors(node['state'])
+        for successor in successors:
+            #creamos un nodo hijo y manejamos su estado, accion, costo y su nodo padre
+            child = {'state':successor[0], 'action':successor[1], 'cost':successor[2], 'parent':node}
+            #si el estado del hijo no esta en explorados
+            if(child['state'] not in explored):
+                #si llegamos a la meta
+                if(problem.isGoalState(child['state'])):
+                    actions = []
+                    node = child
+                    while 'parent' in node:
+                        actions.append(node['action'])
+                        node = node['parent']
+                    actions.reverse()    
+                    return actions
+                #sino insertamos al hijo a la frontera
+                frontier.push(child)
+
+
+
     util.raiseNotDefined()
+
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
