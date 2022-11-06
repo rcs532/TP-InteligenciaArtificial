@@ -72,33 +72,50 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
+
+#comando para ejecutar dfs python pacman.py -l tinyMaze -p SearchAgent -a fn=dfs
 def depthFirstSearch(problem):
-    """
-    Search the deepest nodes in the search tree first.
+   #en frontier guardamos los estados a ser explorados
+    frontier = util.Stack()
+    #en explored vamos a ir llevando a quienes ya exploramos
+    exploredNodes = []
+    #definimos un nodo inicial
+    startState = problem.getStartState()
+    startNode = (startState, [])
+    
+    frontier.push(startNode) #empezamos explorando el primero
+    
+    while not frontier.isEmpty():
+        currentState, actions = frontier.pop()
+        
+        if currentState not in exploredNodes:
+            #marcamos el nodo actual como explorado
+            exploredNodes.append(currentState)
 
-    Your search algorithm needs to return a list of actions that reaches the
-    goal. Make sure to implement a graph search algorithm.
+            if problem.isGoalState(currentState):
+                return actions
+            else:
+                #obtenemos la lista de todos los sucesores del nodo en forma de tupla (successor, action, stepCost)
+                
+                successors = problem.getSuccessors(currentState)
+                
+                #empujamos cada sucesor a la tupla ya que hay que explorarlo
+                for succState, succAction, succCost in successors:
+                    newAction = actions + [succAction]
+                    newNode = (succState, newAction)
+                    frontier.push(newNode)
 
-    To get started, you might want to try some of these simple commands to
-    understand the search problem that is being passed in:
-
-    print("Start:", problem.getStartState())
-    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
-    print("Start's successors:", problem.getSuccessors(problem.getStartState()))
-    """
-    "*** YOUR CODE HERE ***"
+    return actions  
     
     util.raiseNotDefined()
 
 
 #python pacman.py -l mediumMaze -p SearchAgent -a fn=bfs  comando para ejecutar
- 
-
 def breadthFirstSearch(problem):
     node = {'state':problem.getStartState(), 'cost':0} #Me posiciono en el nodo inicial, y llevo registro del costo
     if(problem.isGoalState(node['state'])): 
         return [] #si comienzo en la meta entonces no retorno acciones para hacer
-    frontier = util.Queue()
+    frontier = util.Queue() #aqui guardamos los que todavia no hemos explorado
     frontier.push(node) # Se crea un queue FIFO con node como el unico elemento
     explored=set() #declaramos un set vacio para llevar registro de que exploramos
 
@@ -133,10 +150,42 @@ def breadthFirstSearch(problem):
     util.raiseNotDefined()
 
 
+
+#comando para ejecutar : python pacman.py -l tinyMaze -p SearchAgent -a fn=ucs
 def uniformCostSearch(problem):
-    """Search the node of least total cost first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    #Fifo queue para llevar registro de nodos no explorados
+    frontier = util.PriorityQueue()
+
+    #guarda los estados previamente explorados (para evitar ciclos), guarda stat:cost
+    exploredNodes = {}
+    
+    startState = problem.getStartState()
+    startNode = (startState, [], 0) #(state, action, cost)
+    
+    frontier.push(startNode, 0)
+    
+    while not frontier.isEmpty():
+        #Empezamos explorando el primer nodo de costo mas bajo en la frontera
+        currentState, actions, currentCost = frontier.pop()
+       
+        if (currentState not in exploredNodes) or (currentCost < exploredNodes[currentState]):
+            #ponemos ese nodo en la lista de explorados
+            exploredNodes[currentState] = currentCost
+
+            if problem.isGoalState(currentState):
+                return actions
+            else:
+                #lista de (successor, action, stepCost)
+                successors = problem.getSuccessors(currentState)
+                
+                for succState, succAction, succCost in successors:
+                    newAction = actions + [succAction]
+                    newCost = currentCost + succCost
+                    newNode = (succState, newAction, newCost)
+
+                    frontier.update(newNode, newCost)
+
+    return actions
 
 def nullHeuristic(state, problem=None):
     """
@@ -145,10 +194,55 @@ def nullHeuristic(state, problem=None):
     """
     return 0
 
+# python pacman.py -l trickySearch -p SearchAgent -a fn=astar,prob=FoodSearchProblem,heuristic=foodHeuristic
 def aStarSearch(problem, heuristic=nullHeuristic):
-    """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+     #nodos a explorar: tendra un item, costo+heuristica
+    frontier = util.PriorityQueue()
+    #nodos a explorar
+    exploredNodes = [] #tendra (state, cost)
+
+    startState = problem.getStartState()
+    startNode = (startState, [], 0) #(state, action, cost)
+
+    frontier.push(startNode, 0)
+
+    while not frontier.isEmpty():
+
+        #se comienza explorando el nodo (mas bajo combinando (cost+heuristic) )  en frontier
+        currentState, actions, currentCost = frontier.pop()
+
+        #se pone nodo actual en la lista de explorados
+        currentNode = (currentState, currentCost)
+        exploredNodes.append((currentState, currentCost))
+
+        if problem.isGoalState(currentState):
+            return actions
+
+        else:
+            #lista de (successor, action, stepCost)
+            successors = problem.getSuccessors(currentState)
+
+            #examina cada sucesor
+            for succState, succAction, succCost in successors:
+                newAction = actions + [succAction]
+                newCost = problem.getCostOfActions(newAction)
+                newNode = (succState, newAction, newCost)
+
+                #se revisa si el sucesor ya fue explorado
+                already_explored = False
+                for explored in exploredNodes:
+                    #se revisa la tupla de cada nodo explorado
+                    exploredState, exploredCost = explored
+
+                    if (succState == exploredState) and (newCost >= exploredCost):
+                        already_explored = True
+
+                #si el sucesor no ha sido explorado,se pone en la frontera y lista de explorado
+                if not already_explored:
+                    frontier.push(newNode, newCost + heuristic(succState, problem))
+                    exploredNodes.append((succState, newCost))
+
+    return actions
 
 
 # Abbreviations
