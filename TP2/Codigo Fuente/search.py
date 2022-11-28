@@ -122,7 +122,7 @@ def breadthFirstSearch(problem):
     while True:
         if frontier.isEmpty():
             raise Exception("Search failed")
-
+        
         node= frontier.pop()
 
         explored.add(node['state'])
